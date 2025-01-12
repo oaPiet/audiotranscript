@@ -3,7 +3,6 @@ import wave
 import whisper
 import datetime
 import re
-import sys
 import os
 
 OUTPUT_FOLDER = "output_transcription"
