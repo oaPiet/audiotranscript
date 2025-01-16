@@ -4,14 +4,24 @@ This script records audio, transcribes it using Whisper, and detects hesitation 
 
 ## Requirements
 
-Before running the script, ensure you have Python 3.7 or later installed on your machine. You will also need the following dependencies:
+Before running the script, ensure you have Python 3.7 or later installed on your machine. Additionally, you need to have **ffmpeg** installed as a prerequisite for audio processing.
+
+You will also need the following dependencies:
 
 - **pyaudio** - for audio recording
 - **whisper** - for audio transcription using Whisper model
 - **re** - for regular expressions to detect hesitation markers
-- **os, datetime, wave, sys** - for file management and handling
+- **os, datetime, wave** - for file management and handling
 
 You can install the necessary dependencies using the provided `requirements.txt` file.
+
+### Prerequisites
+
+1. Install **Python 3.7+** if you haven't already. You can download it from [here](https://www.python.org/downloads/).
+2. Install **ffmpeg** on your system:
+   - For **Windows**: Download and install ffmpeg from [FFmpeg Downloads](https://ffmpeg.org/download.html).
+   - For **macOS**: Use Homebrew: `brew install ffmpeg`.
+   - For **Linux**: Use your package manager, for example, `sudo apt install ffmpeg` on Ubuntu.
 
 ## Setup Instructions
 
@@ -43,7 +53,6 @@ Clone the repository or download the project files to your local machine.
    ```
 ### Step 3: Install Dependencies
 With the virtual environment activated, install the required dependencies by running:
-
 ```sh
 pip install -r requirements.txt
 ```
@@ -58,19 +67,51 @@ The script will:
 - Detect hesitation markers from the transcription.
 - Save the transcription and detected markers to a `.txt` file.
 
-## Output Files
-- The audio will be saved as a `.wav` file in the `output_transcription` folder with a timestamp.
-- The transcription and detected hesitation markers will be saved in a `.txt` file with the same base name as the audio file.
+You can also customize the recording behavior by providing additional arguments:
 
-### Example Output
+- `--prep-time <seconds>`: Specifies the preparation time before the recording starts.
+- `--seconds <seconds>`: Defines the recording duration in seconds.
+
+### Example Command:
+To start recording with a 5-second preparation time and a 30-second recording duration, you would run:
+```sh
+python main.py --prep-time 5 --seconds 30
+```
+
+### Step 5: Output Files
+The script generates two output files:
+
+1. **Audio File**:  
+   The recorded audio will be saved as a `.wav` file in the `output_transcription` folder with a timestamp in its filename. Example:
+```sh
+output_transcription/recorded_audio_20250116_103045.wav
+```
+2. **Transcription File**:  
+The transcription and detected hesitation markers will be saved in a `.txt` file with the same base name as the audio file. Example:
+```sh
+output_transcription/recorded_audio_20250116_103045_transcript.txt
+```
+
+### Example Output:
 
 **Transcription:**
-
-You know what they call a Quarter Pounder with Cheese in Paris? They don’t, um, call it a Quarter Pounder with Cheese, they got the, uh, metric system... they call it a Royale with Cheese!
+```sh
+You know what they call a Quarter Pounder with Cheese in Paris?
+They don’t, um, call it a Quarter Pounder with Cheese, 
+they got the, uh, metric system... they call it a Royale with Cheese!
+```
 
 **Detected Hesitations:**
+`um, uh`
 
-um, uh
+### Troubleshooting
+
+- **PyAudio installation on Windows**: If you encounter issues installing PyAudio, try installing the precompiled binary using:
+  ```sh
+  pip install pipwin pipwin install pyaudio
+  ```
+  
+- **Whisper installation**: Whisper should install automatically via the requirements.txt. Ensure you have the necessary hardware to run the models (for example, a GPU for larger models).
 
 ## Additional Information
 
