@@ -4,6 +4,8 @@ import whisper
 import datetime
 import re
 import os
+import argparse
+import time
 
 OUTPUT_FOLDER = "output_transcription"
 MODEL = "base"  # Set the Whisper model variant. For better performance, you can choose a different model. (See: https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages)
@@ -44,11 +46,20 @@ def record_audio():
                     frames_per_buffer=CHUNK)
 
     frames = []
-    
+
+    num_chunks = int(RATE / CHUNK * record_seconds)
+
     try:
-        while True:
-            data = stream.read(CHUNK)
-            frames.append(data)
+        if record_seconds:
+            for i in range(num_chunks):
+                seconds_left = record_seconds - int(i * CHUNK / RATE)
+                print(f"Recording... {seconds_left} seconds remaining", end="\r")
+                data = stream.read(CHUNK)
+                frames.append(data)
+        else:
+            while True:
+                data = stream.read(CHUNK)
+                frames.append(data)
     except KeyboardInterrupt:
         pass
 
@@ -61,7 +72,7 @@ def record_audio():
         wf.setsampwidth(p.get_sample_size(FORMAT))
         wf.setframerate(RATE)
         wf.writeframes(b''.join(frames))
-    
+
     return AUDIO_FILE
 
 def transcribe_audio(audio_path):
@@ -74,34 +85,46 @@ def detect_hesitations(transcription):
 
     # Normalize the transcription to lowercase to improve matching
     transcription = transcription.lower()
-    
+
     for marker in HESITATION_MARKERS:
         if re.search(r'\b' + re.escape(marker) + r'\b', transcription):
             detected_hesitations.append(marker)
-    
+
     return detected_hesitations
 
 def save_transcription(transcription, audio_file, detected_hesitations):
     base_name = os.path.splitext(os.path.basename(audio_file))[0]
     transcript_path = os.path.join(OUTPUT_FOLDER, f"{base_name}_transcript.txt")
-    
+
     with open(transcript_path, 'w') as file:
         file.write("Transcription:\n")
         file.write(transcription)
-        
+
         if detected_hesitations:
             file.write("\n\nDetected Hesitations:\n")
             file.write(", ".join(detected_hesitations))
-    
+
     print(f"Transcript saved at {transcript_path}")
 
 def main():
-    audio_path = record_audio()
+    parser = argparse.ArgumentParser(description="Audio Recorder with Whisper Transcription")
+    parser.add_argument("--prep-time", type=int, default=0, help="Preparation time before recording in seconds")
+    parser.add_argument("--seconds", type=int, default=None, help="Duration to record audio in seconds")
+    args = parser.parse_args()
+
+    print(f"Prepare to speak...", end="\n")
+    if args.prep_time > 0:
+        for i in range(args.prep_time, 0, -1):
+            print(f"Recording will start in {i} seconds.", end="\r")
+            time.sleep(1)
+        print("Recording started!")
+
+    audio_path = record_audio(args.seconds)
     transcription = transcribe_audio(audio_path)
     detected_hesitations = detect_hesitations(transcription)
 
-    print(f"Transcription Preview: {transcription[:100]}...") 
-    
+    print(f"Transcription Preview: {transcription[:100]}...")
+
     save_transcription(transcription, audio_path, detected_hesitations)
 
 if __name__ == "__main__":
