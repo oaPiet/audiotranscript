@@ -23,7 +23,7 @@ HESITATION_MARKERS = [
     "sabes", "ehhh", "mmm", "aaaa", "eeee", "mmmm", "mmm", "hmm"
 ]
 
-def record_audio():
+def record_audio(record_seconds):
     print("Recording... Press Ctrl+C to stop.")
     
     RATE = 16000  # Sample rate
